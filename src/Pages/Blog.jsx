@@ -117,6 +117,7 @@ const Blog = () => {
                                             {categories.map((value) => (
                                                 <li key={value?._id}>
                                                     <Link><p onClick={() => handleCategoryClick(value._id)}>
+                                                        {/*In this API _id is present so I put value._id in handleCategory Click*/}
                                                         {value?.category}
                                                     </p></Link>
                                                 </li>
