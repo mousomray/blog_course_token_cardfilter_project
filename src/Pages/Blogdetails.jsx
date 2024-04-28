@@ -20,17 +20,19 @@ const initialstate = {
 const Blogdetails = () => {
 
     const [commentpost, setcommentPost] = useState(initialstate); // For Comment Post 
+    const [comment, setComment] = useState([]); // For Show Comment normal visibility 
+    const [showComments, setShowComments] = useState(false); // State to control comment visibility after click comment Icon
+    const [like, setLike] = useState([]); // For Like count 
+    const [unlike, setunLike] = useState([]); // For Unlike count
     const [blogdetails, setblogDetails] = useState([]); // For Blog Details 
     const [loadmore, setLoadmore] = useState(3); // For Loadmore 
-    const [comment, setComment] = useState([]); // For Show Comment 
-    const [loading, setLoading] = useState(true); // For Loading 
+    const [loading, setLoading] = useState(true); // For Loading1 
     const [loader, setLoader] = useState(false); // For Loading2 
-    const [like, setLike] = useState({ likes: 0, unlikes: 0 }); // For Like 
     const [auth] = useAuth(); // Custom Hook 
     const { id } = useParams(); // Use Params
-    const [showComments, setShowComments] = useState(false); // State to control comment visibility
 
-    // Comment and Blog Get Handling Start
+
+    // Like, Comment and Blog Get Handling Start
 
     // For Blog Details 
     const getData = async () => {
@@ -50,7 +52,7 @@ const Blogdetails = () => {
         setLoading(false);
     };
 
-    // For Comment
+    // For to show Comment
     const getComment = async () => {
         try {
             const apiurl = `https://restapinodejs.onrender.com/api/comment/${id}`;
@@ -71,7 +73,7 @@ const Blogdetails = () => {
         }
     };
 
-    // Like Data Fetching 
+    // Like Data Fetching for to Show Like 
     const getlike = async () => {
         try {
             const apiurl = `https://restapinodejs.onrender.com/api/blog/like/${id}`;
@@ -91,12 +93,34 @@ const Blogdetails = () => {
         }
     };
 
+    // Unlike Data Fetching for to Show Like 
+    const getunlike = async () => {
+        try {
+            const apiurl = `https://restapinodejs.onrender.com/api/blog/unlike/${id}`;
+
+            // Store token in a variable 
+            const mytoken = {
+                headers: {
+                    "x-access-token": auth.token,
+                },
+            };
+
+            const response = await axios.put(apiurl, {}, mytoken);
+            console.log("Unlike Data is Fetching", response);
+            setunLike(response?.data);
+        } catch (error) {
+            console.log("Error Fetching Unlike Data", error);
+        }
+    };
+
     useEffect(() => {
-        getData();
-        getComment();
-        getlike();
+        getData(); // For Blog
+        getComment(); // For Comment Show 
+        getlike(); // For to Show Like
+        getunlike(); // For to Show Unlike
     }, []);
 
+    // For Loadmore
     const handleLoadmore = () => {
         setLoadmore(prev => prev + 4);
     };
@@ -132,7 +156,7 @@ const Blogdetails = () => {
             toast.success(response?.data?.message);
             setcommentPost(initialstate);
             setLoader(false);
-            getComment(); // Show Comment After Submition 
+            getComment(); // Show Comment After Submition so call getComment function  
         } catch (error) {
             console.log(error);
             toast.error(error?.response?.data?.message);
@@ -174,7 +198,7 @@ const Blogdetails = () => {
 
             const response = await axios.put(apiurl, {}, mytoken);
             console.log("Unlike increased", response);
-            setLike(response?.data);
+            setunLike(response?.data);
         } catch (error) {
             console.log("Error increasing unlike", error);
         }
@@ -246,11 +270,11 @@ const Blogdetails = () => {
                                 </article>
                                 {/* <!-- End blog entry --> */}
 
-                                {/*Start Comment Area */}
+                                {/*Start Like, Unlike and Comment Area */}
                                 <div className="comment-area">
                                     <ThumbUpIcon onClick={handleLike} style={{ cursor: 'pointer' }} /> {like?.likes} &nbsp;&nbsp;&nbsp;
 
-                                    <ThumbDownIcon onClick={handleUnlike} style={{ cursor: 'pointer' }} /> {like?.unlikes} &nbsp;&nbsp;&nbsp;
+                                    <ThumbDownIcon onClick={handleUnlike} style={{ cursor: 'pointer' }} /> {unlike?.unlikes} &nbsp;&nbsp;&nbsp;
 
                                     <CommentIcon onClick={() => setShowComments(!showComments)} style={{ cursor: 'pointer' }} /> {comment.length} Comments
                                     {showComments && (
